@@ -1,7 +1,7 @@
 package cn.bupt.wzl;
 
+import cn.bupt.wzl.GV;
 import java.awt.EventQueue;
-
 import javax.swing.JFrame;
 import javax.swing.JSeparator;
 import javax.swing.JTextArea;
@@ -37,8 +37,8 @@ public class Client {
 	private JScrollPane scrollPane_type;
 	private JTextArea typeArea;
 	private JScrollPane scrollPane_text;
-	private JTextArea textArea[]= new JTextArea[20];
-	public static JList list;
+
+
 	private JButton sendButton;
 	private JButton loginButton;
 	private JTextArea userNameArea;
@@ -63,17 +63,17 @@ public class Client {
 	}
 
 
-	public Client() {
+	public Client() throws IOException {
 		initialize();
+		
 	}
 
 //发送消息
 	private void send() throws IOException {
 		
 		String msg = new String(typeArea.getText());
-		new ClientSnd(userNameArea.getText(),list.getSelectedIndex(),msg).send();
+		new ClientSnd(userNameArea.getText(),GV.list.getSelectedValue().toString(),msg).send();
 		typeArea.setText("");
-		System.out.println(msg);
 	}
 	private void initialize() {
 		frame = new JFrame();
@@ -128,22 +128,22 @@ public class Client {
 		
 		JScrollPane scrollPane_list = new JScrollPane();
 		scrollPane_list.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-		scrollPane_list.setBounds(14, 14, 140, 459);
+		scrollPane_list.setBounds(39, 14, 107, 460);
 		frame.getContentPane().add(scrollPane_list);
 		
 		
     //用户列表
-		list = new JList();
-		list.addListSelectionListener(new ListSelectionListener() {
+		GV.list = new JList();
+		GV.list.setEnabled(false);
+		GV.list.addListSelectionListener(new ListSelectionListener() {
 			public void valueChanged(ListSelectionEvent arg0) {
-				System.out.println(list.getSelectedIndex()+"");
-				cl_panel_text.show(panel_text,list.getSelectedIndex()+"");
+				cl_panel_text.show(panel_text,GV.list.getSelectedIndex()+"");
 			}
 		});
-		scrollPane_list.setViewportView(list);
-		list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		list.setModel(new AbstractListModel() {
-			String[] values = new String[] {"1", "2", "3", "4", "5", "6"};
+		scrollPane_list.setViewportView(GV.list);
+		GV.list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		GV.list.setModel(new AbstractListModel() {
+			String[] values = new String[] {"GROUP","wzl","lh","qxy","lsj"};
 			public int getSize() {
 				return values.length;
 			}
@@ -151,7 +151,8 @@ public class Client {
 				return values[index];
 			}
 		});
-		list.setBorder(new LineBorder(new Color(0, 0, 0)));
+		GV.list.setBorder(new LineBorder(new Color(0, 0, 0)));
+		
 		
 		
     //发送消息的按钮
@@ -196,21 +197,26 @@ public class Client {
     //登陆用户名的按钮
 		loginButton = new JButton("\u767B\u9646");
 		//登陆表面效果的具体实现
-		loginButton.addActionListener(new ActionListener() {
+		loginButton.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent arg0) {
 				if(!loginButtonIsPressed && !userNameArea.getText().equals("请输入账号、密码")) {
 					userNameArea.setForeground(Color.BLACK);
 					userNameArea.setEnabled(false);
 					passwordField.setEnabled(false);
-					list.setEnabled(true);
+					GV.list.setEnabled(true);
 					typeArea.setEnabled(true);
-
+					try {
+						new ClientSnd(userNameArea.getText(),passwordField.getText()).logIn();
+					} catch (IOException e) {
+						// TODO 自动生成的 catch 块
+						e.printStackTrace();
+					}
 					loginButton.setText("下线");
 					loginButtonIsPressed = true;
 					//name.setBackground(new Color(220,220,220));
 				}else {
 					userNameArea.setForeground(Color.BLACK);
-					list.setEnabled(false);
+					GV.list.setEnabled(false);
 					typeArea.setEnabled(false);
 					userNameArea.setEnabled(true);
 					passwordField.setText("");
@@ -222,8 +228,6 @@ public class Client {
 				
 			}
 		});
-		
-	//登陆按钮
 		loginButton.setToolTipText("logIn");
 		loginButton.setBounds(324, 478, 113, 27);
 		frame.getContentPane().add(loginButton);
@@ -245,21 +249,38 @@ public class Client {
 		scrollPane_text.setViewportView(panel_text);
 		panel_text.setLayout(cl_panel_text);
 		for (int i = 0; i < 20; i++) {
-			textArea[i] = new JTextArea();
-			textArea[i].setEditable(false);
-			panel_text.add(textArea[i], ""+i);
+			GV.textArea[i] = new JTextArea();
+			GV.textArea[i].setText(""+i);
+			GV.textArea[i].setEditable(false);
+			panel_text.add(GV.textArea[i], ""+i);
 		}
 		
 	//注册按钮
 		JButton button = new JButton("\u6CE8\u518C");
+		button.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				try {
+					new ClientSnd(userNameArea.getText(),passwordField.getText()).register();
+				} catch (IOException e) {
+					// TODO 自动生成的 catch 块
+					e.printStackTrace();
+				}
+			}
+		});
 		button.setBounds(441, 478, 63, 27);
 		frame.getContentPane().add(button);
 	
 	//密码输入框
 		passwordField = new JPasswordField();
-		passwordField.setBorder(new LineBorder(new Color(171, 173, 179)));
+		passwordField.setBorder(new LineBorder(new Color(0, 0, 0)));
 		passwordField.setBounds(199, 480, 101, 24);
 		frame.getContentPane().add(passwordField);
+	//在线离线状态表
+		JList list_1 = new JList();
+		list_1.setEnabled(false);
+		list_1.setBorder(new LineBorder(new Color(0, 0, 0)));
+		list_1.setBounds(18, 14, 21, 458);
+		frame.getContentPane().add(list_1);
 		
 		
 		
