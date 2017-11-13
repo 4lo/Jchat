@@ -1,10 +1,8 @@
 package cn.bupt.wzl;
 
-import java.awt.List;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
-import cn.bupt.wzl.*;
 
 public class ClientRcv extends Thread{
 	protected DatagramSocket socket = null;
@@ -14,7 +12,6 @@ public class ClientRcv extends Thread{
 	}
 	public ClientRcv(String name) throws IOException{
 		super(name);
-		socket = new DatagramSocket(4444);
 	}
 	
 	
@@ -22,21 +19,32 @@ public class ClientRcv extends Thread{
 	public void run(){
 		String msg;
 		DatagramPacket packet;
-		byte[] buf;
+		
 		try {
-			while(true) {
-				buf = new byte[1024];
-				packet= new DatagramPacket(buf, buf.length);
-				
-				socket.receive(packet);
+			socket = new DatagramSocket(4444);
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+		
+		while(true) {
+			
+			byte[] buf = new byte[1024];
+			packet= new DatagramPacket(buf, buf.length);			
+			msg = new String(packet.getData());
+			System.out.println(msg);
+			String a = msg.substring(0,6);
+			if(a.equals("##UPD:")) {
+				a = msg.substring(msg.indexOf("##UPD:")+6,msg.indexOf("UPD!!"));
+				int index = new Integer(a);
+				System.out.println(index);
+				GV.defaultListModel.add(index,msg.substring(msg.indexOf("##MNM:")+6,msg.indexOf("MNM!!")));
 
-				msg = new String(packet.getData());
+			}else {
 				int i =new Integer(msg.substring(msg.indexOf("##IDX:")+6, msg.indexOf("IDX!!")));
-				GV.textArea[i].append("\n" + msg.substring(msg.indexOf("IDX!!") + 5));
+				GV.textArea[1].append("\n" + msg.substring(msg.indexOf("IDX!!") + 5));
+				
 			}
-		} catch (IOException e) {
-			// TODO 自动生成的 catch 块
-			e.printStackTrace();
+			
 		}
 	}
 

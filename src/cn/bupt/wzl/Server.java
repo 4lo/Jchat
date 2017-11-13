@@ -26,11 +26,17 @@ public class Server {
 	}
 	public Server() throws IOException,IndexOutOfBoundsException {
 		socket = new DatagramSocket(4869); 
+		User tmp1 = new User();
+		tmp1.address = "localhost";
+		tmp1.password = "123";
+		tmp1.isOnline = false;
+		tmp1.index = 1;
+		user.put("wzl",tmp1);
+		userIndex.put(1, "wzl");
 		while(true) {
 			byte[] rcvBuf = new byte[1024];
 			byte[] sndBuf = new byte[1024];
 			String sndStr = new String();	
-			new Date().toString();
 			
 			packet = new DatagramPacket(rcvBuf, rcvBuf.length);
 			socket.receive(packet);
@@ -44,22 +50,37 @@ public class Server {
 			receiver = data.substring(data.indexOf("##RCV:") + 6, data.indexOf("RCV!!"));
 			clientName = data.substring(data.indexOf("##MNM:") + 6, data.indexOf("MNM!!"));
 			
+			
+
+			
 		//注册
 			if(cmd.equals("REGISTER")) {
+				for(int i = 1;i<=userNumber;i++) {
+					sndStr = "##UPD:" + i + "UPD!!" + "##MNM:"+userIndex.get(i)+"MNM!!";
+					sndBuf = sndStr.getBytes();
+					packet = new DatagramPacket(sndBuf, sndBuf.length,clientAddress,port);
+					socket.send(packet);
+				}
 				userNumber++;
-				//user[userNumber].userName = msg;//password;
-				//user[userNumber].address = clientAddress.toString();
-				//user[userNumber].isOnline = false;
-				//user[userNumber].index = userNumber;
+
 				userIndex.put(userNumber,clientName);
 				
 				User tmp = new User();
-				tmp.address = clientAddress.toString();
+				tmp.address = clientAddress.toString().substring(1);
 				tmp.password = msg;
 				tmp.isOnline = false;
 				tmp.index = userNumber;
 				user.put(clientName,tmp);
-				//System.out.println(user.get(clientName).address + user.get(clientName).password + user.get(clientName).isOnline);
+
+				for(int i= 1;i<=userNumber;i++) {
+					sndStr = "##UPD:" + userNumber + "UPD!!" + "##MNM:"+ userIndex.get(userNumber)+"MNM!!";
+					sndBuf = sndStr.getBytes();
+					InetAddress address = InetAddress.getByName(user.get(userIndex.get(i)).address);
+					packet = new DatagramPacket(sndBuf, sndBuf.length,address,port);
+					socket.send(packet);
+				}
+
+				
 			}
 			
 			
@@ -82,14 +103,15 @@ public class Server {
 		//一对一聊天
 			if(cmd.equals("ACHAT")) {
 				//发给 发送端用户 以显示在其对应聊天框中
-				sndStr = "##IDX:" + user.get(receiver).index + "IDX!!" + clientName +"ls"+ (new Date().toString()) + "\n" + msg;
+				sndStr = user.get(receiver).index + "";
+				sndStr = "##IDX:" + sndStr + "IDX!!" + clientName + "\n" + msg;
 				sndBuf = sndStr.getBytes();
 				packet = new DatagramPacket(sndBuf, sndBuf.length,clientAddress,port);
 				socket.send(packet);
 				//发给接受用户
 				System.out.println(clientAddress.toString());
 				InetAddress address = InetAddress.getByName("localhost");
-				sndStr = "##IDX:" + user.get(clientName).index + "IDX!!" + clientName + (new Date().toString()) + "\n" + msg;
+				sndStr = "##IDX:" + user.get(clientName).index + "IDX!!" + clientName + "\n" + msg;
 				sndBuf = sndStr.getBytes();
 				packet = new DatagramPacket(sndBuf, sndBuf.length,address,port);
 				socket.send(packet);

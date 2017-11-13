@@ -18,6 +18,7 @@ import java.awt.event.FocusEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.io.IOException;
+import java.net.Socket;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import javax.swing.JPanel;
@@ -72,7 +73,8 @@ public class Client {
 	private void send() throws IOException {
 		
 		String msg = new String(typeArea.getText());
-		new ClientSnd(userNameArea.getText(),GV.list.getSelectedValue().toString(),msg).send();
+		ClientSnd a = new ClientSnd(userNameArea.getText(),GV.list.getSelectedValue().toString(),msg);
+		a.send();
 		typeArea.setText("");
 	}
 	private void initialize() {
@@ -142,15 +144,9 @@ public class Client {
 		});
 		scrollPane_list.setViewportView(GV.list);
 		GV.list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		GV.list.setModel(new AbstractListModel() {
-			String[] values = new String[] {"GROUP","wzl","lh","qxy","lsj"};
-			public int getSize() {
-				return values.length;
-			}
-			public Object getElementAt(int index) {
-				return values[index];
-			}
-		});
+		GV.list.setModel(GV.defaultListModel);
+		GV.defaultListModel.add(0,"GROUP");
+		GV.defaultListModel.add(1,"wzl");
 		GV.list.setBorder(new LineBorder(new Color(0, 0, 0)));
 		
 		
@@ -250,17 +246,18 @@ public class Client {
 		panel_text.setLayout(cl_panel_text);
 		for (int i = 0; i < 20; i++) {
 			GV.textArea[i] = new JTextArea();
-			GV.textArea[i].setText(""+i);
 			GV.textArea[i].setEditable(false);
 			panel_text.add(GV.textArea[i], ""+i);
 		}
 		
 	//注册按钮
+
 		JButton button = new JButton("\u6CE8\u518C");
 		button.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				try {
-					new ClientSnd(userNameArea.getText(),passwordField.getText()).register();
+					ClientSnd b = new ClientSnd(userNameArea.getText(),passwordField.getText());
+					b.register();
 				} catch (IOException e) {
 					// TODO 自动生成的 catch 块
 					e.printStackTrace();

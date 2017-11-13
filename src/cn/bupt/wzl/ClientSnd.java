@@ -8,7 +8,7 @@ import java.net.InetAddress;
 import java.net.SocketException;
 
 public class ClientSnd{
-	private String serverAddress = "10.126.243.190";
+	private String serverAddress = "localhost";
 	private String myName;
 	private String receiver;
 	private DatagramSocket socket;
@@ -37,14 +37,15 @@ public class ClientSnd{
 		}else {
 			cmd = "ACHAT";
 		}
+		receiver = "wzl";
+		msg = "##CMD:" + cmd + "CMD!!"+ "##MSG:" + msg + "MSG!!"+"##MNM:" + myName + "MNM!!"+"##RCV:" + receiver + "RCV!!";
 
-		msg = "##CMD:" + cmd + "CMD!!" +"##RCV:" + receiver + "RCV!!##MNM:" + myName + "MNM!!##MSG:" + msg + "MSG!!";
-		//System.out.println(msg);
+		//System.out.println("iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiisend::"+msg);
 		buf = msg.getBytes();
 		
         DatagramPacket packet = new DatagramPacket(buf, buf.length,address, 4869);
         socket.send(packet);	
-        socket.close();
+        //socket.close();
 	}
 	public void logIn() throws IOException {
 		socket = new DatagramSocket();
@@ -55,17 +56,18 @@ public class ClientSnd{
 		buf = msg.getBytes();
         DatagramPacket packet = new DatagramPacket(buf, buf.length,address, 4869);
         socket.send(packet);	
-        socket.close();
+        //socket.close();
 	}
 	public void register() throws IOException {
 		socket = new DatagramSocket();
 		byte[] buf = new byte[1024];
 		InetAddress address = InetAddress.getByName(serverAddress);
 		cmd = "REGISTER";
-		msg = "##CMD:" + cmd + "CMD!!" +"##RCV:" + receiver + "RCV!!##MNM:" + myName + "MNM!!##MSG:" + msg + "MSG!!";
+		msg = "##CMD:" + cmd + "CMD!!" +"##RCV:" + "aaaaa" + "RCV!!##MNM:" + myName + "MNM!!##MSG:" + msg + "MSG!!";
+		System.out.println("register"+msg);
 		buf = msg.getBytes();
         DatagramPacket packet = new DatagramPacket(buf, buf.length,address, 4869);
         socket.send(packet);	
-        socket.close();
+        //socket.close();
 	}
 }
